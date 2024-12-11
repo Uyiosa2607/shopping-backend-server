@@ -32,7 +32,7 @@ function verifyAccessToken(
     jwt.verify(token, process.env.JWT_SECRET_KEY!);
     next();
   } catch (error) {
-    res.status(403).json({ error: error.message });
+    res.status(403).json({ error: "invalid access token" });
   }
 }
 

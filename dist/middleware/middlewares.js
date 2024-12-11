@@ -18,7 +18,7 @@ function verifyAccessToken(req, res, next) {
         next();
     }
     catch (error) {
-        res.status(403).json({ error: error.message });
+        res.status(403).json({ error: "invalid access token" });
     }
 }
 function verifyAdminAccessAndToken(req, res, next) {
