@@ -14,7 +14,9 @@ function verifyAccessToken(req, res, next) {
         return;
     }
     try {
-        jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET_KEY);
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET_KEY);
+        req.user = decoded;
+        console.log(decoded);
         next();
     }
     catch (error) {
