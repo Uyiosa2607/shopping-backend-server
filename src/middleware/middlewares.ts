@@ -22,8 +22,7 @@ function verifyAccessToken(
   res: Response,
   next: NextFunction
 ): void {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader?.split(" ")[1];
+  const token = req.cookies["acessToken"];
   if (!token) {
     res.status(401).json({ error: "not authorized" });
     return;
@@ -44,9 +43,7 @@ function verifyAdminAccessAndToken(
   res: Response,
   next: NextFunction
 ): void {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader?.split(" ")[1];
-
+  const token = req.cookies["acessToken"];
   if (!token) {
     res.status(401);
     return;
@@ -73,4 +70,22 @@ function verifyAdminAccessAndToken(
   }
 }
 
-export { verifyAccessToken, verifyAdminAccessAndToken };
+//middleware to check and verify refresh token
+function verifyRefreshToken(req: Request, res: Response, next: NextFunction) {
+  const refreshToken = req.cookies["refreshToken"];
+  if (refreshToken) {
+    console.log("refreshtoken:", refreshToken);
+    try {
+      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY!);
+      req.user = decoded;
+      next();
+      return;
+    } catch (error) {
+      res.status(403).json({ error: "invalid or expired access token" });
+    }
+  } else {
+    res.status(401).json({ error: "invalid refresh token" });
+  }
+}
+
+export { verifyAccessToken, verifyAdminAccessAndToken, verifyRefreshToken };

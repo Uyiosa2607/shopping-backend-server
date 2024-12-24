@@ -6,14 +6,16 @@ import jwt from "jsonwebtoken";
 interface Account {
   id: string;
   email: string;
-  name: string;
   isAdmin: boolean;
 }
 
 export const Prisma = new PrismaClient();
 
 function generateRefreshToken(user: Account) {
-  const refreshToken = jwt.sign(user, process.env.JWT_REFRESH_KEY!);
+  const refreshToken = jwt.sign(
+    { email: user?.email, uid: user?.id },
+    process.env.JWT_REFRESH_KEY!
+  );
   return refreshToken;
 }
 
@@ -24,15 +26,22 @@ function handleWelcome(req: Request, res: Response): void {
 
 // generate access token
 async function generateAcessToken(req: Request, res: Response): Promise<void> {
-  // const options = {
-  //   expiresIn: "10m",
-  // };
-
+  const options = {
+    expiresIn: "10m",
+  };
   try {
-    res.status(200).json(req.body);
+    const accessToken = jwt.sign(
+      { email: req.user?.email, uid: req.user.uid },
+      process.env.JWT_SECRET_KEY!,
+      options
+    );
+    res.cookie("accessToken", accessToken, { maxAge: 500000 });
+    res.status(201).json({ message: "access token refreshed" });
+    return;
   } catch (error) {
     console.log(error);
-    res.status(501);
+    res.status(501).json({ error: "internal server error" });
+    return;
   }
 }
 
@@ -94,20 +103,29 @@ async function handleLogin(req: Request, res: Response) {
         expiresIn: "10m",
       };
 
-      //prevents the user password from being sent back to client
-      const { password, ...account } = user;
-
       //creates an access token with the user account object
-      const token = jwt.sign(account, process.env.JWT_SECRET_KEY!, options);
+      const acessToken = jwt.sign(
+        { email: user?.email, uid: user?.id },
+        process.env.JWT_SECRET_KEY!,
+        options
+      );
 
-      const refreshToken = generateRefreshToken(user);
+      const { password, ...userDatails } = user;
 
-      //returns response with the user email and access tokens with a login successfull message
+      // creates refresh token
+      const refreshToken = generateRefreshToken(userDatails);
+
+      //sets access token to a cookie named accessToken
+      res.cookie("accessToken", acessToken, { maxAge: 500000 });
+
+      //sets refresh token to a cookie
+      res.cookie("refreshToken", refreshToken, { maxAge: 90000000 });
+
+      //finaly returns a 200 status code including the uid and email of the authenticated user
       res.status(200).json({
         message: "Login successfull",
-        accessToken: token,
-        refreshToken: refreshToken,
-        user: account,
+        email: user?.email,
+        uid: user?.id,
       });
       return;
 

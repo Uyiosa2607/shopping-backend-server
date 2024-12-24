@@ -9,16 +9,17 @@ import {
 import {
   verifyAccessToken,
   verifyAdminAccessAndToken,
+  verifyRefreshToken,
 } from "../middleware/middlewares";
 
 const authRouter = express.Router();
 
-authRouter.get("/", verifyAdminAccessAndToken, handleWelcome);
+// authRouter.get("/", verifyAdminAccessAndToken, handleWelcome);
 
 authRouter.post("/register", handleRegistration);
 
 authRouter.post("/login", handleLogin);
 
-authRouter.post("/token", verifyAccessToken, generateAcessToken);
+authRouter.get("/refresh-token", verifyRefreshToken, generateAcessToken);
 
 export { authRouter };
