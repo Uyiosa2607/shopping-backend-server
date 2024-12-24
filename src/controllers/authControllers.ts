@@ -13,7 +13,7 @@ export const Prisma = new PrismaClient();
 
 function generateRefreshToken(user: Account) {
   const refreshToken = jwt.sign(
-    { email: user?.email, uid: user?.id },
+    { email: user?.email, uid: user?.id, isAdmin: user?.isAdmin },
     process.env.JWT_REFRESH_KEY!
   );
   return refreshToken;
@@ -104,19 +104,20 @@ async function handleLogin(req: Request, res: Response) {
       };
 
       //creates an access token with the user account object
-      const acessToken = jwt.sign(
-        { email: user?.email, uid: user?.id },
+      const accessToken = jwt.sign(
+        { email: user?.email, uid: user?.id, isAdmin: user?.isAdmin },
         process.env.JWT_SECRET_KEY!,
         options
       );
 
+      //prevents the hashed password from being sent back to the frontend
       const { password, ...userDatails } = user;
 
       // creates refresh token
       const refreshToken = generateRefreshToken(userDatails);
 
       //sets access token to a cookie named accessToken
-      res.cookie("accessToken", acessToken, { maxAge: 500000 });
+      res.cookie("accessToken", accessToken, { maxAge: 500000 });
 
       //sets refresh token to a cookie
       res.cookie("refreshToken", refreshToken, { maxAge: 90000000 });

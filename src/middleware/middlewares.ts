@@ -11,7 +11,6 @@ declare global {
 
 interface Decoded {
   id: string;
-  name: string;
   isAdmin: boolean;
   email: string;
 }
@@ -22,7 +21,8 @@ function verifyAccessToken(
   res: Response,
   next: NextFunction
 ): void {
-  const token = req.cookies["acessToken"];
+  const token = req.cookies["accessToken"];
+  console.log(token);
   if (!token) {
     res.status(401).json({ error: "not authorized" });
     return;
@@ -43,9 +43,11 @@ function verifyAdminAccessAndToken(
   res: Response,
   next: NextFunction
 ): void {
-  const token = req.cookies["acessToken"];
+  const token = req.cookies["accessToken"];
   if (!token) {
-    res.status(401);
+    res
+      .status(401)
+      .json({ error: "access denied, only admin can perform such operations" });
     return;
   }
 
