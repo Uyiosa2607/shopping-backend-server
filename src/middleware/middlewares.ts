@@ -56,11 +56,10 @@ function verifyAdminAccessAndToken(
 
     if (decoded.isAdmin !== true) {
       res.status(403).json({
-        error: "Access denied: Admin privileges required",
+        error: "Access denied! Admin privileges required",
       });
       return;
     }
-
     req.user = decoded;
     next();
   } catch (error: any) {
@@ -84,9 +83,11 @@ function verifyRefreshToken(req: Request, res: Response, next: NextFunction) {
       return;
     } catch (error) {
       res.status(403).json({ error: "invalid or expired access token" });
+      return;
     }
   } else {
     res.status(401).json({ error: "invalid refresh token" });
+    return;
   }
 }
 

@@ -11,6 +11,7 @@ interface Account {
 
 export const Prisma = new PrismaClient();
 
+//function to generate refresh token without expiry date
 function generateRefreshToken(user: Account) {
   const refreshToken = jwt.sign(
     { email: user?.email, uid: user?.id, isAdmin: user?.isAdmin },
@@ -19,22 +20,25 @@ function generateRefreshToken(user: Account) {
   return refreshToken;
 }
 
-function handleWelcome(req: Request, res: Response): void {
-  console.log(req.body);
-  res.status(200).send({ message: "You are welcome" });
-}
+// function handleWelcome(req: Request, res: Response): void {
+//   console.log(req.body);
+//   res.status(200).send({ message: "You are welcome" });
+// }
 
 // generate access token
 async function generateAcessToken(req: Request, res: Response): Promise<void> {
   const options = {
-    expiresIn: "10m",
+    expiresIn: "3m",
   };
+
+  //signs the jwt token with the user id, email and role
   try {
     const accessToken = jwt.sign(
-      { email: req.user?.email, uid: req.user.uid },
+      { email: req.user?.email, uid: req.user.uid, isAdmin: req.user?.isAdmin },
       process.env.JWT_SECRET_KEY!,
       options
     );
+    //sends back new access token
     res.cookie("accessToken", accessToken, { maxAge: 500000 });
     res.status(201).json({ message: "access token refreshed" });
     return;
@@ -100,7 +104,7 @@ async function handleLogin(req: Request, res: Response) {
 
     if (match) {
       const options = {
-        expiresIn: "10m",
+        expiresIn: "3m",
       };
 
       //creates an access token with the user account object
@@ -143,4 +147,4 @@ async function handleLogin(req: Request, res: Response) {
 
 async function handleLogout() {}
 
-export { handleWelcome, handleRegistration, handleLogin, generateAcessToken };
+export { handleRegistration, handleLogin, generateAcessToken };
