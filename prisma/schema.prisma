@@ -30,11 +30,6 @@ model Products {
   desc String?
   price Int
   isNew Boolean @default(false)
-  creatorID Int?
+  creatorID String?
 }
 
-model RefreshToken {
-  id String @id @default(uuid())
-  token String
-  created_at DateTime @default(now())
-}

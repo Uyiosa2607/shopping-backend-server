@@ -25,6 +25,25 @@ function generateRefreshToken(user: Account) {
 //   res.status(200).send({ message: "You are welcome" });
 // }
 
+//function to validate auth status
+async function getAuthStatus(req: Request, res: Response) {
+  const userUID = req?.user?.uid;
+  try {
+    const user = await Prisma.user.findUnique({
+      where: { id: userUID },
+      select: { name: true, email: true, id: true },
+    });
+    res.status(200).json({ user, autheticated: true });
+    return;
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "something went wronf! internal server error" });
+    return;
+  }
+}
+
 // generate access token
 async function generateAcessToken(req: Request, res: Response): Promise<void> {
   const options = {
@@ -147,4 +166,4 @@ async function handleLogin(req: Request, res: Response) {
 
 async function handleLogout() {}
 
-export { handleRegistration, handleLogin, generateAcessToken };
+export { handleRegistration, handleLogin, generateAcessToken, getAuthStatus };
