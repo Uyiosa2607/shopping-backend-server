@@ -3,10 +3,18 @@ import { authRouter } from "./routes/authRoutes";
 import { productRouter } from "./routes/productsRoutes";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
+
+const corsOptions = {
+  origin: "http://localhost:3000",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 const PORT = process.env.PORT || 2051;
 

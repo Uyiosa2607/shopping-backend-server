@@ -4,6 +4,7 @@ import {
   handleLogin,
   generateAcessToken,
   getAuthStatus,
+  handleLogout,
 } from "../controllers/authControllers";
 
 import {
@@ -26,5 +27,7 @@ authRouter.post("/login", handleLogin);
 
 //handles refresh token endpoint
 authRouter.get("/refresh-token", verifyRefreshToken, generateAcessToken);
+
+authRouter.get("/signout", handleLogout);
 
 export { authRouter };

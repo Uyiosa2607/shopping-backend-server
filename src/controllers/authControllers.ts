@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { strict } from "assert";
 
 interface Account {
   id: string;
@@ -33,7 +34,7 @@ async function getAuthStatus(req: Request, res: Response) {
       where: { id: userUID },
       select: { name: true, email: true, id: true },
     });
-    res.status(200).json({ user, autheticated: true });
+    res.status(200).json({ user, authenticated: true });
     return;
   } catch (error) {
     console.log(error);
@@ -47,7 +48,7 @@ async function getAuthStatus(req: Request, res: Response) {
 // generate access token
 async function generateAcessToken(req: Request, res: Response): Promise<void> {
   const options = {
-    expiresIn: "3m",
+    expiresIn: "1m",
   };
 
   //signs the jwt token with the user id, email and role
@@ -58,8 +59,9 @@ async function generateAcessToken(req: Request, res: Response): Promise<void> {
       options
     );
     //sends back new access token
+    console.log("token refresh response was received");
     res.cookie("accessToken", accessToken, { maxAge: 500000 });
-    res.status(201).json({ message: "access token refreshed" });
+    res.status(200).json({ message: "access token refreshed" });
     return;
   } catch (error) {
     console.log(error);
@@ -123,7 +125,7 @@ async function handleLogin(req: Request, res: Response) {
 
     if (match) {
       const options = {
-        expiresIn: "3m",
+        expiresIn: "1m",
       };
 
       //creates an access token with the user account object
@@ -140,10 +142,18 @@ async function handleLogin(req: Request, res: Response) {
       const refreshToken = generateRefreshToken(userDatails);
 
       //sets access token to a cookie named accessToken
-      res.cookie("accessToken", accessToken, { maxAge: 500000 });
+      res.cookie("accessToken", accessToken, {
+        maxAge: 500000,
+        httpOnly: true,
+        secure: false,
+      });
 
       //sets refresh token to a cookie
-      res.cookie("refreshToken", refreshToken, { maxAge: 90000000 });
+      res.cookie("refreshToken", refreshToken, {
+        maxAge: 90000000,
+        httpOnly: true,
+        secure: false,
+      });
 
       //finaly returns a 200 status code including the uid and email of the authenticated user
       res.status(200).json({
@@ -164,6 +174,29 @@ async function handleLogin(req: Request, res: Response) {
   }
 }
 
-async function handleLogout() {}
+//logout route, removes auth token from client browser
+async function handleLogout(req: Request, res: Response) {
+  try {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: false,
+    });
+    res.clearCookie("accessToken", { httpOnly: true, secure: false });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "internal server error, something went wrong" });
+  }
+  res.status(200).json({ message: "logout successfull" });
+  console.log("logout function was called");
+  return;
+}
 
-export { handleRegistration, handleLogin, generateAcessToken, getAuthStatus };
+export {
+  handleRegistration,
+  handleLogin,
+  generateAcessToken,
+  getAuthStatus,
+  handleLogout,
+};

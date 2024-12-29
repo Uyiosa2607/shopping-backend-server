@@ -22,7 +22,6 @@ function verifyAccessToken(
   next: NextFunction
 ): void {
   const token = req.cookies["accessToken"];
-  console.log(token);
   if (!token) {
     res.status(401).json({ error: "not authorized" });
     return;
@@ -30,7 +29,6 @@ function verifyAccessToken(
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY!) as Decoded;
     req.user = decoded;
-    console.log(decoded);
     next();
   } catch (error) {
     res.status(403).json({ error: "invalid access token" });
@@ -75,7 +73,6 @@ function verifyAdminAccessAndToken(
 function verifyRefreshToken(req: Request, res: Response, next: NextFunction) {
   const refreshToken = req.cookies["refreshToken"];
   if (refreshToken) {
-    console.log("refreshtoken:", refreshToken);
     try {
       const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY!);
       req.user = decoded;
