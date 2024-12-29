@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { strict } from "assert";
 
 interface Account {
   id: string;
@@ -20,11 +19,6 @@ function generateRefreshToken(user: Account) {
   );
   return refreshToken;
 }
-
-// function handleWelcome(req: Request, res: Response): void {
-//   console.log(req.body);
-//   res.status(200).send({ message: "You are welcome" });
-// }
 
 //function to validate auth status
 async function getAuthStatus(req: Request, res: Response) {
@@ -60,7 +54,12 @@ async function generateAcessToken(req: Request, res: Response): Promise<void> {
     );
     //sends back new access token
     console.log("token refresh response was received");
-    res.cookie("accessToken", accessToken, { maxAge: 500000 });
+    res.cookie("accessToken", accessToken, {
+      maxAge: 500000,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: false,
+    });
     res.status(200).json({ message: "access token refreshed" });
     return;
   } catch (error) {
@@ -146,6 +145,7 @@ async function handleLogin(req: Request, res: Response) {
         maxAge: 500000,
         httpOnly: true,
         secure: false,
+        sameSite: "strict",
       });
 
       //sets refresh token to a cookie
@@ -153,6 +153,7 @@ async function handleLogin(req: Request, res: Response) {
         maxAge: 90000000,
         httpOnly: true,
         secure: false,
+        sameSite: "strict",
       });
 
       //finaly returns a 200 status code including the uid and email of the authenticated user
