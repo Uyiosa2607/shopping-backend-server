@@ -24,7 +24,7 @@ function generateRefreshToken(user: Account) {
 async function getAuthStatus(req: Request, res: Response) {
   const userUID = req?.user?.uid;
   try {
-    const user = await Prisma.user.findUnique({
+    const user = await Prisma.users.findUnique({
       where: { id: userUID },
       select: { name: true, email: true, id: true },
     });
@@ -48,7 +48,12 @@ async function generateAcessToken(req: Request, res: Response): Promise<void> {
   //signs the jwt token with the user id, email and role
   try {
     const accessToken = jwt.sign(
-      { email: req.user?.email, uid: req.user.uid, isAdmin: req.user?.isAdmin },
+      {
+        email: req.user?.email,
+        uid: req.user.uid,
+        isAdmin: req.user?.isAdmin,
+        method: "token",
+      },
       process.env.JWT_SECRET_KEY!,
       options
     );
@@ -78,7 +83,7 @@ async function handleRegistration(req: Request, res: Response) {
 
   //the user name, email and the hashed password is stored in database
   try {
-    await Prisma.user.create({
+    await Prisma.users.create({
       data: {
         email,
         password: hashedPassword,
@@ -87,17 +92,17 @@ async function handleRegistration(req: Request, res: Response) {
     });
 
     //sends a registration successfull message if db operation is succesfull
-    res.status(201).json({ message: "registration successfull" });
+    res.status(201).json("registration successfull");
   } catch (error) {
     console.log(error);
     //if error it checks for the "P2002" error which means the email already exist in db then sends back email already exist back to client
     if (error.code === "P2002") {
-      res.status(501).json({ error: "email already exists" });
+      res.status(501).json("email already exists");
       return;
     } else {
-      res.status(501).json({ message: "something went wrong" });
+      res.status(500).json("something went wrong");
     }
-    res.status(501).json({ error: error });
+    res.status(501).json("internal server error");
     return;
   }
 }
@@ -107,9 +112,11 @@ async function handleRegistration(req: Request, res: Response) {
 async function handleLogin(req: Request, res: Response) {
   const { email, password } = req.body;
 
+  console.log(email, password);
+
   try {
     //finds the user account from db with email
-    const user = await Prisma.user.findUnique({
+    const user = await Prisma.users.findUnique({
       where: { email },
     });
 
@@ -129,7 +136,12 @@ async function handleLogin(req: Request, res: Response) {
 
       //creates an access token with the user account object
       const accessToken = jwt.sign(
-        { email: user?.email, uid: user?.id, isAdmin: user?.isAdmin },
+        {
+          email: user?.email,
+          uid: user?.id,
+          isAdmin: user?.isAdmin,
+          method: "auth",
+        },
         process.env.JWT_SECRET_KEY!,
         options
       );
@@ -166,7 +178,7 @@ async function handleLogin(req: Request, res: Response) {
 
       //if passwords do not match returns a error message
     } else {
-      res.status(401).json({ error: "invalid credentials" });
+      res.status(401).json("invalid credentials");
       return;
     }
   } catch (error) {
