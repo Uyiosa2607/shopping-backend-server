@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-  origin: process.env.FRONT_END_URL,
+  origin: "https://kultra-devices.vercel.app",
   credentials: true,
 };
 
