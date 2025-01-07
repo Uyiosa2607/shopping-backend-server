@@ -177,7 +177,7 @@ async function handleLogin(req: Request, res: Response) {
         maxAge: 30 * 60 * 1000,
         secure: true,
         httpOnly: true,
-        sameSite: "none",
+        sameSite: "strict",
       });
 
       //sets refresh token to a cookie
@@ -185,7 +185,7 @@ async function handleLogin(req: Request, res: Response) {
         maxAge: 60 * 60 * 1000,
         secure: true,
         httpOnly: true,
-        sameSite: "none",
+        sameSite: "strict",
       });
 
       //finaly returns a 200 status code including the uid and email of the authenticated user
