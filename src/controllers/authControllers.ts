@@ -64,7 +64,7 @@ async function handleGetUser(req: Request, res: Response) {
 // generate access token
 async function generateAcessToken(req: Request, res: Response): Promise<void> {
   const options = {
-    expiresIn: "15m",
+    expiresIn: "30m",
   };
 
   //signs the jwt token with the user id, email and role
@@ -82,7 +82,7 @@ async function generateAcessToken(req: Request, res: Response): Promise<void> {
     //sends back new access token
     console.log("token refresh response was received");
     res.cookie("accessToken", accessToken, {
-      maxAge: 30 * 60 * 1000,
+      maxAge: 1800 * 1000,
       sameSite: "none",
       secure: true,
       httpOnly: true,
@@ -151,7 +151,7 @@ async function handleLogin(req: Request, res: Response) {
 
     if (match) {
       const options = {
-        expiresIn: "15m",
+        expiresIn: "30m",
       };
 
       //creates an access token with the user account object
@@ -174,18 +174,18 @@ async function handleLogin(req: Request, res: Response) {
 
       //sets access token to a cookie named accessToken
       res.cookie("accessToken", accessToken, {
-        maxAge: 30 * 60 * 1000,
+        maxAge: 1800 * 1000,
         secure: true,
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "none",
       });
 
       //sets refresh token to a cookie
       res.cookie("refreshToken", refreshToken, {
-        maxAge: 60 * 60 * 1000,
+        maxAge: 3600 * 1000,
         secure: true,
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "none",
       });
 
       //finaly returns a 200 status code including the uid and email of the authenticated user
