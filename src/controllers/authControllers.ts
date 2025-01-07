@@ -26,7 +26,7 @@ async function getAuthStatus(req: Request, res: Response) {
   try {
     const user = await Prisma.users.findUnique({
       where: { id: userUID },
-      select: { name: true, email: true, id: true },
+      select: { name: true, email: true, id: true, isAdmin: true },
     });
     res.status(200).json({ user, authenticated: true });
     return;
@@ -34,15 +34,37 @@ async function getAuthStatus(req: Request, res: Response) {
     console.log(error);
     res
       .status(500)
-      .json({ error: "something went wronf! internal server error" });
+      .json({ error: "something went wrong! internal server error" });
     return;
+  }
+}
+
+//get user
+
+async function handleGetUser(req: Request, res: Response) {
+  const userId = req.query.user_id as string;
+  try {
+    const findUser = await Prisma.users.findUnique({
+      where: { id: userId },
+    });
+    if (findUser) {
+      const { password, ...userDetails } = findUser;
+      res.status(200).json(userDetails);
+    } else {
+      res
+        .status(404)
+        .json("no user found, user with provided id does not exit");
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("something went wrong, internal server error");
   }
 }
 
 // generate access token
 async function generateAcessToken(req: Request, res: Response): Promise<void> {
   const options = {
-    expiresIn: "1m",
+    expiresIn: "15m",
   };
 
   //signs the jwt token with the user id, email and role
@@ -112,8 +134,6 @@ async function handleRegistration(req: Request, res: Response) {
 async function handleLogin(req: Request, res: Response) {
   const { email, password } = req.body;
 
-  console.log(email, password);
-
   try {
     //finds the user account from db with email
     const user = await Prisma.users.findUnique({
@@ -131,7 +151,7 @@ async function handleLogin(req: Request, res: Response) {
 
     if (match) {
       const options = {
-        expiresIn: "1m",
+        expiresIn: "15m",
       };
 
       //creates an access token with the user account object
@@ -212,4 +232,5 @@ export {
   generateAcessToken,
   getAuthStatus,
   handleLogout,
+  handleGetUser,
 };

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Prisma } from "./authControllers";
+import { stat } from "fs";
 
 //fetch all availble items from the database
 async function getAllProducts(req: Request, res: Response) {
@@ -37,9 +38,21 @@ async function findProduct(req: Request, res: Response) {
 // function upadates item based on the provided id
 async function updateProduct(req: Request, res: Response) {
   //id is from params of patch request
+
+  //checks user making request
+
   const { id } = req.params;
-  const { name, price, desc, isNew } = req.body;
+  const { name, price, desc, isNew, img, specs, features } = req.body;
   try {
+    const user = await Prisma.users.findUnique({
+      where: { id: req.user?.uid },
+    });
+
+    if (user?.isAdmin !== true) {
+      res.status(403).json("only admins can modify products");
+      return;
+    }
+
     const updatedProduct = await Prisma.products.update({
       where: { id },
       data: {
@@ -47,6 +60,9 @@ async function updateProduct(req: Request, res: Response) {
         price,
         desc,
         isNew,
+        img,
+        specs,
+        features,
       },
     });
     //sends back a ok response to client if update operation is succesfull
@@ -69,12 +85,25 @@ async function updateProduct(req: Request, res: Response) {
 }
 // this function  creates and store new product items to the product table
 async function addProduct(req: Request, res: Response) {
-  const { name, price } = req.body;
+  const { name, price, desc, img, specs, features } = req.body;
   try {
+    const user = await Prisma.users.findUnique({
+      where: { id: req.user?.uid },
+    });
+
+    if (user?.isAdmin !== true) {
+      res.status(403).json("only admins can modify products");
+      return;
+    }
+
     const newProduct = await Prisma.products.create({
       data: {
         name,
         price,
+        img,
+        specs,
+        features,
+        desc,
       },
     });
     if (newProduct) {
@@ -95,6 +124,15 @@ async function removeProduct(req: Request, res: Response) {
   //finds the item to delete with the provided product ID
   const productID = String(req.query.product);
   try {
+    const user = await Prisma.users.findUnique({
+      where: { id: req.user?.uid },
+    });
+
+    if (user?.isAdmin !== true) {
+      res.status(403).json("only admins can modify products");
+      return;
+    }
+
     const itemToDelete = await Prisma.products.delete({
       where: {
         id: productID,

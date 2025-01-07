@@ -6,21 +6,18 @@ import {
   updateProduct,
   removeProduct,
 } from "../controllers/productControllers";
-import {
-  verifyAdminAccessAndToken,
-  verifyAccessToken,
-} from "../middleware/middlewares";
+import { verifyAccessToken } from "../middleware/middlewares";
 
 const productRouter = express.Router();
 
-productRouter.get("/", verifyAccessToken, getAllProducts);
+productRouter.get("/", getAllProducts);
 
 productRouter.get("/items", verifyAccessToken, findProduct);
 
-productRouter.post("/add-product", verifyAdminAccessAndToken, addProduct);
+productRouter.post("/add-product", verifyAccessToken, addProduct);
 
-productRouter.patch("/:id", verifyAdminAccessAndToken, updateProduct);
+productRouter.patch("/:id", verifyAccessToken, updateProduct);
 
-productRouter.delete("/remove", verifyAdminAccessAndToken, removeProduct);
+productRouter.delete("/remove", verifyAccessToken, removeProduct);
 
 export { productRouter };

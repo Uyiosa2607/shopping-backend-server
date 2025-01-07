@@ -36,38 +36,38 @@ function verifyAccessToken(
 }
 
 // Middleware to verify admin access and token
-function verifyAdminAccessAndToken(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
-  const token = req.cookies["accessToken"];
-  if (!token) {
-    res
-      .status(401)
-      .json({ error: "access denied, only admin can perform such operations" });
-    return;
-  }
+// function verifyAdminAccessAndToken(
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ): void {
+//   const token = req.cookies["accessToken"];
+//   if (!token) {
+//     res
+//       .status(401)
+//       .json({ error: "access denied, only admin can perform such operations" });
+//     return;
+//   }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY!) as Decoded;
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY!) as Decoded;
 
-    if (decoded.isAdmin !== true) {
-      res.status(403).json({
-        error: "Access denied! Admin privileges required",
-      });
-      return;
-    }
-    req.user = decoded;
-    next();
-  } catch (error: any) {
-    console.log({
-      error: error.message,
-    });
-    res.status(403).json({ error: "invalid access token" });
-    return;
-  }
-}
+//     if (decoded.isAdmin !== true) {
+//       res.status(403).json({
+//         error: "Access denied! Admin privileges required",
+//       });
+//       return;
+//     }
+//     req.user = decoded;
+//     next();
+//   } catch (error: any) {
+//     console.log({
+//       error: error.message,
+//     });
+//     res.status(403).json({ error: "invalid access token" });
+//     return;
+//   }
+// }
 
 //middleware to check and verify refresh token
 function verifyRefreshToken(req: Request, res: Response, next: NextFunction) {
@@ -88,4 +88,4 @@ function verifyRefreshToken(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export { verifyAccessToken, verifyAdminAccessAndToken, verifyRefreshToken };
+export { verifyAccessToken, verifyRefreshToken };
