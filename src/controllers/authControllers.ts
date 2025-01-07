@@ -175,6 +175,7 @@ async function handleLogin(req: Request, res: Response) {
       res.cookie("accessToken", accessToken, {
         maxAge: 30 * 60 * 1000,
         secure: true,
+        httpOnly: true,
         sameSite: "none",
       });
 
@@ -182,6 +183,7 @@ async function handleLogin(req: Request, res: Response) {
       res.cookie("refreshToken", refreshToken, {
         maxAge: 60 * 60 * 1000,
         secure: true,
+        httpOnly: true,
         sameSite: "none",
       });
 
