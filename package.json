@@ -24,7 +24,8 @@
   "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon dist/main.js"
+    "dev": "nodemon dist/main.js",
+    "start": "node dist/main.js"
   },
   "nodemonConfig": {
     "watch": [
