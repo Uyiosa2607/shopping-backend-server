@@ -13,9 +13,13 @@ export const Prisma = new PrismaClient();
 
 //function to generate refresh token without expiry date
 function generateRefreshToken(user: Account) {
+  const options = {
+    expiresIn: "1d",
+  };
   const refreshToken = jwt.sign(
     { email: user?.email, uid: user?.id, isAdmin: user?.isAdmin },
-    process.env.JWT_REFRESH_KEY!
+    process.env.JWT_REFRESH_KEY!,
+    options
   );
   return refreshToken;
 }
@@ -182,7 +186,7 @@ async function handleLogin(req: Request, res: Response) {
 
       //sets refresh token to a cookie
       res.cookie("refreshToken", refreshToken, {
-        maxAge: 3600 * 1000,
+        maxAge: 86400000,
         secure: true,
         httpOnly: true,
         sameSite: "none",
