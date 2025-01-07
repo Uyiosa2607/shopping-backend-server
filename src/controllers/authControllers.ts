@@ -83,9 +83,9 @@ async function generateAcessToken(req: Request, res: Response): Promise<void> {
     console.log("token refresh response was received");
     res.cookie("accessToken", accessToken, {
       maxAge: 500000,
-      httpOnly: true,
-      sameSite: "strict",
-      secure: false,
+      httpOnly: false,
+      sameSite: "none",
+      secure: true,
     });
     res.status(200).json({ message: "access token refreshed" });
     return;
@@ -177,7 +177,7 @@ async function handleLogin(req: Request, res: Response) {
         maxAge: 500000,
         httpOnly: false,
         secure: true,
-        sameSite: "strict",
+        sameSite: "none",
       });
 
       //sets refresh token to a cookie
@@ -185,7 +185,7 @@ async function handleLogin(req: Request, res: Response) {
         maxAge: 90000000,
         httpOnly: false,
         secure: true,
-        sameSite: "strict",
+        sameSite: "none",
       });
 
       //finaly returns a 200 status code including the uid and email of the authenticated user
