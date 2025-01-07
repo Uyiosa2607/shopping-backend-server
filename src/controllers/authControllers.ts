@@ -175,16 +175,16 @@ async function handleLogin(req: Request, res: Response) {
       //sets access token to a cookie named accessToken
       res.cookie("accessToken", accessToken, {
         maxAge: 500000,
-        httpOnly: true,
-        secure: false,
+        httpOnly: false,
+        secure: true,
         sameSite: "strict",
       });
 
       //sets refresh token to a cookie
       res.cookie("refreshToken", refreshToken, {
         maxAge: 90000000,
-        httpOnly: true,
-        secure: false,
+        httpOnly: false,
+        secure: true,
         sameSite: "strict",
       });
 
