@@ -83,7 +83,6 @@ async function generateAcessToken(req: Request, res: Response): Promise<void> {
     console.log("token refresh response was received");
     res.cookie("accessToken", accessToken, {
       maxAge: 500000,
-      httpOnly: false,
       sameSite: "none",
       secure: true,
     });
@@ -175,7 +174,6 @@ async function handleLogin(req: Request, res: Response) {
       //sets access token to a cookie named accessToken
       res.cookie("accessToken", accessToken, {
         maxAge: 500000,
-        httpOnly: false,
         secure: true,
         sameSite: "none",
       });
@@ -183,7 +181,6 @@ async function handleLogin(req: Request, res: Response) {
       //sets refresh token to a cookie
       res.cookie("refreshToken", refreshToken, {
         maxAge: 90000000,
-        httpOnly: false,
         secure: true,
         sameSite: "none",
       });
