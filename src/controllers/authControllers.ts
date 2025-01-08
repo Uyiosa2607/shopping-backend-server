@@ -216,9 +216,14 @@ async function handleLogout(req: Request, res: Response) {
   try {
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: false,
+      secure: true,
+      sameSite: "none",
     });
-    res.clearCookie("accessToken", { httpOnly: true, secure: false });
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
   } catch (error) {
     console.log(error);
     res
