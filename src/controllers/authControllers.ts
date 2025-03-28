@@ -12,7 +12,7 @@ interface Account {
 export const Prisma = new PrismaClient();
 
 //function to generate refresh token without expiry date
-function generateRefreshToken(user: Account) {
+function generateRefreshToken(user: Account): string {
   const options = {
     expiresIn: "1d",
   };
@@ -25,27 +25,24 @@ function generateRefreshToken(user: Account) {
 }
 
 //function to validate auth status
-async function getAuthStatus(req: Request, res: Response) {
+async function getAuthStatus(req: Request, res: Response): Promise<any> {
   const userUID = req?.user?.uid;
   try {
     const user = await Prisma.users.findUnique({
       where: { id: userUID },
       select: { name: true, email: true, id: true, isAdmin: true },
     });
-    res.status(200).json({ user, authenticated: true });
-    return;
+    return res.status(200).json({ user, authenticated: true });
   } catch (error) {
     console.log(error);
-    res
+    return res
       .status(500)
       .json({ error: "something went wrong! internal server error" });
-    return;
   }
 }
 
 //get user
-
-async function handleGetUser(req: Request, res: Response) {
+async function handleGetUser(req: Request, res: Response): Promise<any> {
   const userId = req.query.user_id as string;
   try {
     const findUser = await Prisma.users.findUnique({
@@ -53,20 +50,23 @@ async function handleGetUser(req: Request, res: Response) {
     });
     if (findUser) {
       const { password, ...userDetails } = findUser;
-      res.status(200).json(userDetails);
+      return res.status(200).json(userDetails);
     } else {
-      res
+      return res
         .status(404)
         .json("no user found, user with provided id does not exit");
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json("something went wrong, internal server error");
+    return res.status(500).json("something went wrong, internal server error");
   }
 }
 
 // generate access token
-async function generateAcessToken(req: Request, res: Response): Promise<void> {
+async function generateAcessToken(
+  req: Request,
+  res: Response
+): Promise<any | string[]> {
   const options = {
     expiresIn: "30m",
   };
@@ -91,17 +91,15 @@ async function generateAcessToken(req: Request, res: Response): Promise<void> {
       secure: true,
       httpOnly: true,
     });
-    res.status(200).json({ message: "access token refreshed" });
-    return;
+    return res.status(200).json({ message: "access token refreshed" });
   } catch (error) {
     console.log(error);
-    res.status(501).json({ error: "internal server error" });
-    return;
+    return res.status(501).json({ error: "internal server error" });
   }
 }
 
 // handles registration
-async function handleRegistration(req: Request, res: Response) {
+async function handleRegistration(req: Request, res: Response): Promise<any> {
   const { email, password, name } = req.body;
 
   //plain password provided is hashed
@@ -118,24 +116,22 @@ async function handleRegistration(req: Request, res: Response) {
     });
 
     //sends a registration successfull message if db operation is succesfull
-    res.status(201).json("registration successfull");
+    return res.status(201).json("registration successfull");
   } catch (error) {
     console.log(error);
     //if error it checks for the "P2002" error which means the email already exist in db then sends back email already exist back to client
     if (error.code === "P2002") {
       res.status(501).json("email already exists");
-      return;
     } else {
       res.status(500).json("something went wrong");
     }
-    res.status(501).json("internal server error");
-    return;
+    return res.status(501).json("internal server error");
   }
 }
 
 // handles login/authentication
 
-async function handleLogin(req: Request, res: Response) {
+async function handleLogin(req: Request, res: Response): Promise<any> {
   const { email, password } = req.body;
 
   try {
@@ -146,14 +142,13 @@ async function handleLogin(req: Request, res: Response) {
 
     //if no account is found a not found message is sent back
     if (!user) {
-      res.status(404).json({ error: "account does not exist" });
-      return;
+      return res.status(404).json({ error: "account does not exist" });
     }
 
     //if account exist the hashed password from db is compared to the password submited, if the match is positive an access token is generated and sent to the user
-    const match = await bcrypt.compare(password, user.password);
+    const passwordMatched = await bcrypt.compare(password, user.password);
 
-    if (match) {
+    if (passwordMatched) {
       const options = {
         expiresIn: "30m",
       };
@@ -193,26 +188,26 @@ async function handleLogin(req: Request, res: Response) {
       });
 
       //finaly returns a 200 status code including the uid and email of the authenticated user
-      res.status(200).json({
+      return res.status(200).json({
         message: "Login successfull",
         email: user?.email,
         uid: user?.id,
       });
-      return;
 
       //if passwords do not match returns a error message
     } else {
-      res.status(401).json("invalid credentials");
-      return;
+      return res.status(401).json("invalid credentials");
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "internal server error" });
+    return res
+      .status(500)
+      .json({ error: "something went wrong, internal server error" });
   }
 }
 
 //logout route, removes auth token from client browser
-async function handleLogout(req: Request, res: Response) {
+async function handleLogout(req: Request, res: Response): Promise<any> {
   try {
     res.clearCookie("refreshToken", {
       httpOnly: true,
@@ -226,13 +221,11 @@ async function handleLogout(req: Request, res: Response) {
     });
   } catch (error) {
     console.log(error);
-    res
+    return res
       .status(500)
       .json({ error: "internal server error, something went wrong" });
   }
-  res.status(200).json({ message: "logout successfull" });
-  console.log("logout function was called");
-  return;
+  return res.status(200).json({ message: "logout successfull" });
 }
 
 export {

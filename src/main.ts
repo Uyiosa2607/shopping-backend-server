@@ -1,6 +1,7 @@
 import express from "express";
 import { authRouter } from "./routes/authRoutes";
 import { productRouter } from "./routes/productsRoutes";
+import { paymentRouter } from "./routes/paymentRoute";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -27,6 +28,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRouter);
 
 app.use("/api/products", productRouter);
+
+app.use("/api/pay", paymentRouter);
 
 app.listen(PORT, () =>
   console.log(`server has started and running on port ${PORT}`)
