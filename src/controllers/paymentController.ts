@@ -3,14 +3,11 @@ import axios from "axios";
 
 async function handlePayment(req: Request, res: Response): Promise<any> {
   let { email, amount } = req.body;
-  // if (amount >= 1) {
-  //   amount = amount * 100; // Convert Naira to kobo (only if amount is in Naira)
-  // }
 
   try {
     const response = await axios.post(
       "https://api.paystack.co/transaction/initialize",
-      { email, amount },
+      { email, amount: amount * 100 },
       {
         headers: {
           Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
