@@ -67,7 +67,7 @@ async function createOrderRecord(req: Request, res: Response): Promise<any> {
   const event = req.body;
 
   if (event.event === "charge.success") {
-    const { reference, amount, email, metadata } = event.data;
+    const { reference, amount, customer, metadata } = event.data;
     const items = metadata?.items || [];
 
     try {
@@ -75,7 +75,7 @@ async function createOrderRecord(req: Request, res: Response): Promise<any> {
         data: {
           reference,
           amount: Number(amount),
-          email,
+          email: customer?.email,
           status: "paid",
           items,
         },
