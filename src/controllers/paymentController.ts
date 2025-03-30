@@ -74,7 +74,7 @@ async function createOrderRecord(req: Request, res: Response): Promise<any> {
       await Prisma.orders.create({
         data: {
           reference,
-          amount,
+          amount: Number(amount),
           email,
           status: "paid",
           items,
