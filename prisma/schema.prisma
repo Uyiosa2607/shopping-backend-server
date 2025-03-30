@@ -39,7 +39,7 @@ model Products {
 
 model Orders {
   id String @id @default(uuid(4))
-  reference String?
+  reference String @unique
   email String
   amount Int
   status String
