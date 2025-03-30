@@ -102,30 +102,15 @@ async function createOrderRecord(req: Request, res: Response): Promise<any> {
     const items = metadata?.items || [];
 
     try {
-      const existingOrder = await Prisma.orders.findUnique({
-        where: { reference },
+      await Prisma.orders.create({
+        data: {
+          reference,
+          amount: Number(amount / 100), // Convert Kobo to Naira
+          email: customer.email,
+          status: "pending",
+          items: items || [],
+        },
       });
-
-      if (existingOrder) {
-        // If order exists and was pending, update it
-        if (existingOrder.status === "pending") {
-          await Prisma.orders.update({
-            where: { reference },
-            data: { status: "paid" },
-          });
-        }
-      } else {
-        // If order doesn't exist, create a new one
-        await Prisma.orders.create({
-          data: {
-            reference,
-            amount: Number(amount / 100), // Convert Kobo to Naira
-            email: customer.email,
-            status: "pending",
-            items: items || [],
-          },
-        });
-      }
 
       return res.sendStatus(200);
     } catch (error) {
