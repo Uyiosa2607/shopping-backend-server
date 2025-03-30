@@ -39,11 +39,11 @@ model Products {
 
 model Orders {
   id String @id @default(uuid(4))
-  reference String
+  reference String?
   email String
   amount Int
   status String
-  items Json
+  items Json?
   createdAt  DateTime  @default(now())
 }
 
