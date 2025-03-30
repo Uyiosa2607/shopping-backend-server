@@ -28,7 +28,7 @@ async function initPayment(req: Request, res: Response): Promise<any> {
     res.status(500).json({ error: error.message });
   }
 }
-
+// function to verify payment status from paystack
 async function verifyPayment(req: Request, res: Response): Promise<any> {
   const { reference } = req.params;
 
@@ -50,9 +50,11 @@ async function verifyPayment(req: Request, res: Response): Promise<any> {
   }
 }
 
+//function to create order record if the payment was succesfull
 async function createOrderRecord(req: Request, res: Response): Promise<any> {
   const secret = process.env.PAYSTACK_SECRET_KEY;
 
+  //verify paystack signature
   const hash = crypto
     .createHmac("sha512", secret!)
     .update(JSON.stringify(req.body))
