@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
+import crypto from "crypto";
 import axios from "axios";
+import { Prisma } from "./authControllers";
 
 async function initPayment(req: Request, res: Response): Promise<any> {
   let { email, amount } = req.body;
@@ -48,4 +50,43 @@ async function verifyPayment(req: Request, res: Response): Promise<any> {
   }
 }
 
-export { initPayment, verifyPayment };
+async function createOrderRecord(req: Request, res: Response): Promise<any> {
+  const secret = process.env.PAYSTACK_SECRET_KEY;
+
+  const hash = crypto
+    .createHmac("sha512", secret!)
+    .update(JSON.stringify(req.body))
+    .digest("hex");
+
+  if (hash !== req.headers["x-paystack-signature"]) {
+    return res.status(400).json({ message: "invalid signature" });
+  }
+
+  const event = req.body;
+
+  if (event.event === "charge.success") {
+    const { reference, amount, email, metadata } = event.data;
+    const items = metadata?.items || [];
+
+    try {
+      await Prisma.orders.create({
+        data: {
+          reference,
+          amount,
+          email,
+          status: "paid",
+          items,
+        },
+      });
+
+      return res.sendStatus(200);
+    } catch (error) {
+      console.log("error occured trying to store data", error);
+      res.status(500).json("Error storing order");
+    }
+  }
+
+  res.sendStatus(200);
+}
+
+export { initPayment, verifyPayment, createOrderRecord };

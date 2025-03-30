@@ -1,6 +1,10 @@
 import express from "express";
 import { verifyAccessToken } from "../middleware/middlewares";
-import { initPayment, verifyPayment } from "../controllers/paymentController";
+import {
+  initPayment,
+  verifyPayment,
+  createOrderRecord,
+} from "../controllers/paymentController";
 
 const paymentRouter = express.Router();
 
@@ -10,5 +14,6 @@ paymentRouter.get(
   verifyAccessToken,
   verifyPayment
 );
+paymentRouter.post("/payment-webhook", createOrderRecord);
 
 export { paymentRouter };

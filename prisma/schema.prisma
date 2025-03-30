@@ -37,3 +37,13 @@ model Products {
   inStock Boolean @default(true)
 }
 
+model Orders {
+  id String @id @default(uuid(4))
+  reference String
+  email String
+  amount Int
+  status String
+  items Json
+  createdAt  DateTime  @default(now())
+}
+
