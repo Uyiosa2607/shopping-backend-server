@@ -66,7 +66,7 @@ async function createOrderRecord(req: Request, res: Response): Promise<any> {
 
   const event = req.body;
 
-  if (event.event === "charge.success") {
+  if (event.event === "charge.success" || event.event === "charge.pending") {
     const { reference, amount, customer, metadata } = event.data;
     const items = metadata?.items || [];
 
@@ -90,8 +90,8 @@ async function createOrderRecord(req: Request, res: Response): Promise<any> {
             reference,
             amount: Number(amount / 100), // Convert Kobo to Naira
             email: customer.email,
-            status: "paid",
-            items,
+            status,
+            items: items || [],
           },
         });
       }
