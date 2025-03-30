@@ -12,7 +12,6 @@ async function initPayment(req: Request, res: Response): Promise<any> {
       {
         email,
         amount: amount * 100,
-        // callback_url: `http://localhost:3000/payment-status`,
       },
       {
         headers: {
