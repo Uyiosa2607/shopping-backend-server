@@ -65,7 +65,39 @@ async function createOrderRecord(req: Request, res: Response): Promise<any> {
 
   const event = req.body;
 
-  if (event.event === "charge.success" || event.event === "charge.pending") {
+  if (event.event === "charge.success") {
+    const { reference, amount, customer, metadata } = event.data;
+    const items = metadata?.items || [];
+
+    try {
+      const existingOrder = await Prisma.orders.findUnique({
+        where: { reference },
+      });
+
+      if (existingOrder) {
+        await Prisma.orders.update({
+          where: { reference },
+          data: { status: "paid" },
+        });
+      } else {
+        // If order doesn't exist, create a new one
+        await Prisma.orders.create({
+          data: {
+            reference,
+            amount: Number(amount / 100), // Convert Kobo to Naira
+            email: customer.email,
+            status: "paid",
+            items: items || [],
+          },
+        });
+      }
+
+      return res.sendStatus(200);
+    } catch (error) {
+      console.log("error occured trying to store data", error);
+      res.status(500).json("Error storing order");
+    }
+  } else {
     const { reference, amount, customer, metadata } = event.data;
     const items = metadata?.items || [];
 
@@ -89,7 +121,7 @@ async function createOrderRecord(req: Request, res: Response): Promise<any> {
             reference,
             amount: Number(amount / 100), // Convert Kobo to Naira
             email: customer.email,
-            status,
+            status: "pending",
             items: items || [],
           },
         });
