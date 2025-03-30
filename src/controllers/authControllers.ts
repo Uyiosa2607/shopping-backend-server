@@ -142,7 +142,7 @@ async function handleLogin(req: Request, res: Response): Promise<any> {
 
     //if no account is found a not found message is sent back
     if (!user) {
-      return res.status(404).json({ error: "account does not exist" });
+      return res.status(404).json("account does not exist");
     }
 
     //if account exist the hashed password from db is compared to the password submited, if the match is positive an access token is generated and sent to the user
