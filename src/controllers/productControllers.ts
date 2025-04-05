@@ -15,7 +15,6 @@ async function getAllProducts(req: Request, res: Response): Promise<any> {
 //returns a single item matched with the provided product id
 async function findProduct(req: Request, res: Response): Promise<any> {
   const productID = String(req.query.product);
-  console.log(req.user);
   try {
     const product = await Prisma.products.findUnique({
       where: { id: productID },
