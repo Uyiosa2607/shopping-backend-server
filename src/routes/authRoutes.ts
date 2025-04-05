@@ -1,38 +1,17 @@
 import express from "express";
 import {
-  handleRegistration,
   handleLogin,
-  generateAcessToken,
-  getAuthStatus,
   handleLogout,
-  handleGetUser,
+  handleRegistration,
+  checkAuthStatus,
 } from "../controllers/authControllers";
-
-import {
-  verifyAccessToken,
-  verifyRefreshToken,
-} from "../middleware/middlewares";
+import passport from "../libs/passport";
 
 const authRouter = express.Router();
 
-// authRouter.get("/", verifyAdminAccessAndToken, handleWelcome);
-
-//verifies user auth status
-authRouter.get("/get-auth", verifyAccessToken, getAuthStatus);
-
-//handles registration endpoint
+authRouter.post("/login", passport.authenticate("local"), handleLogin);
 authRouter.post("/register", handleRegistration);
+authRouter.get("/auth-status", checkAuthStatus);
+authRouter.post("/logout", handleLogout);
 
-//handles login endpoint
-authRouter.post("/login", handleLogin);
-
-//handles refresh token endpoint
-authRouter.get("/refresh-token", verifyRefreshToken, generateAcessToken);
-
-//sign out route
-authRouter.get("/signout", handleLogout);
-
-//route to get get user details with the user_id query
-authRouter.get("/users", handleGetUser);
-
-export { authRouter };
+export default authRouter;

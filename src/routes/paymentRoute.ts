@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyAccessToken } from "../middleware/middlewares";
+import { verifyAuthentication } from "../middleware/middlewares";
 import {
   initPayment,
   verifyPayment,
@@ -8,10 +8,10 @@ import {
 
 const paymentRouter = express.Router();
 
-paymentRouter.post("/initialize-payment", verifyAccessToken, initPayment);
+paymentRouter.post("/initialize-payment", verifyAuthentication, initPayment);
 paymentRouter.get(
   "/verify-payment/:reference",
-  verifyAccessToken,
+  verifyAuthentication,
   verifyPayment
 );
 paymentRouter.post("/payment-webhook", createOrderRecord);

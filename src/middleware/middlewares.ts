@@ -1,57 +1,32 @@
-import jwt from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
+import { Response, Request, NextFunction } from "express";
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: Decoded | any;
-    }
-  }
-}
-
-interface Decoded {
-  id: string;
-  isAdmin: boolean;
-  email: string;
-}
-
-// Middleware to verify access token
-function verifyAccessToken(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): any {
-  const token = req.cookies["accessToken"];
-  if (!token) {
-    return res.status(401).json({ error: "not authorized" });
-  }
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY!) as Decoded;
-    req.user = decoded;
+function verifyAuthentication(req: Request, res: Response, next: NextFunction) {
+  if (req.isAuthenticated()) {
     return next();
-  } catch (error) {
-    return res.status(403).json({ error: "invalid access token" });
   }
+  res.status(403).json("unathorized");
 }
 
-//middleware to check and verify refresh token
-function verifyRefreshToken(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): any {
-  const refreshToken = req.cookies["refreshToken"];
-  if (refreshToken) {
-    try {
-      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY!);
-      req.user = decoded;
-      return next();
-    } catch (error) {
-      return res.status(403).json({ error: "invalid or expired access token" });
-    }
-  } else {
-    return res.status(401).json({ error: "invalid refresh token" });
-  }
-}
+// async function checkAdminAccess(
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ): Promise<any> {
+//   if (!req.isAuthenticated()) return res.status(401).json("not authorized");
+//   try {
+//     const user = await Prisma.users.findUnique({
+//       where: { email: req.user?.email },
+//     });
+//     if (user?.isAdmin !== true) {
+//       return res
+//         .status(403)
+//         .json("access denied, only admins can access function");
+//     }
+//     next();
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json("something went wrong, internal server error!");
+//   }
+// }
 
-export { verifyAccessToken, verifyRefreshToken };
+export { verifyAuthentication };

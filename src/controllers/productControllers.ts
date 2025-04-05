@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Prisma } from "./authControllers";
+import { Prisma } from "../libs/prisma";
 
 //fetch all availble items from the database
 async function getAllProducts(req: Request, res: Response): Promise<any> {
@@ -15,6 +15,7 @@ async function getAllProducts(req: Request, res: Response): Promise<any> {
 //returns a single item matched with the provided product id
 async function findProduct(req: Request, res: Response): Promise<any> {
   const productID = String(req.query.product);
+  console.log(req.user);
   try {
     const product = await Prisma.products.findUnique({
       where: { id: productID },
@@ -44,7 +45,7 @@ async function updateProduct(req: Request, res: Response): Promise<any> {
   const { name, price, desc, isNew, img, specs, features } = req.body;
   try {
     const user = await Prisma.users.findUnique({
-      where: { id: req.user?.uid },
+      where: { id: req!.user!.id! },
     });
 
     if (user?.isAdmin !== true)
@@ -84,7 +85,7 @@ async function addProduct(req: Request, res: Response): Promise<any> {
   const { name, price, desc, img, specs, features } = req.body;
   try {
     const user = await Prisma.users.findUnique({
-      where: { id: req.user?.uid },
+      where: { id: req.user?.id },
     });
 
     if (user?.isAdmin !== true)
@@ -117,7 +118,7 @@ async function removeProduct(req: Request, res: Response): Promise<any> {
   const productID = String(req.query.product);
   try {
     const user = await Prisma.users.findUnique({
-      where: { id: req.user?.uid },
+      where: { id: req.user?.id },
     });
 
     if (user?.isAdmin !== true) {
