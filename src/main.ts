@@ -8,7 +8,6 @@ import cookieParser from "cookie-parser";
 import passport from "./libs/passport";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
-import { sendEmail } from "./utils/mailer";
 import cors from "cors";
 
 dotenv.config();
@@ -46,10 +45,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 5 * 60 * 60 * 1000,
-      secure: false,
+      maxAge: 1000 * 60 * 60 * 24,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "none",
-      httpOnly: false,
+      httpOnly: true,
     },
   })
 );
