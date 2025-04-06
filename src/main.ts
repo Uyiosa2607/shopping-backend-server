@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import passport from "./libs/passport";
+import { RedisStore } from "connect-redis";
+import { createClient } from "redis";
 import cors from "cors";
 
 dotenv.config();
@@ -22,18 +24,28 @@ app.use(cors(corsOptions));
 const PORT = process.env.PORT || 2051;
 
 app.use(cookieParser());
-
 app.use(express.json());
-
 app.use(express.urlencoded({ extended: true }));
+
+const redisClient = createClient({
+  url: process.env.REDIS_URL,
+  // legacyMode: true,
+});
+
+redisClient.connect().catch(console.error);
+
+const redisStore = new RedisStore({
+  client: redisClient,
+});
 
 app.use(
   session({
-    secret: "my-secret-key",
+    secret: process.env.SESSION_SECRET!,
+    store: redisStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 5 * 60 * 60 * 1000,
       secure: false,
       sameSite: "none",
       httpOnly: false,
@@ -45,11 +57,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/api/v1/auth", authRouter);
-
 app.use("/api/v1/products", productRouter);
-
 app.use("/api/v1/pay", paymentRouter);
 
 app.listen(PORT, () =>
-  console.log(`server has started and running on port ${PORT}`)
+  console.log(`Server has started and running on port ${PORT}`)
 );
