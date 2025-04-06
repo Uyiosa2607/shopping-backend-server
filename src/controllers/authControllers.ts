@@ -63,7 +63,7 @@ async function handleRegistration(req: Request, res: Response) {
 
 //End point function to get auth status / check auth status
 function checkAuthStatus(req: Request, res: Response): any {
-  if (!req.isAuthenticated()) return res.redirect("/login");
+  if (!req.isAuthenticated()) return res.status(403).json("not authorized");
   return res.sendStatus(200);
 }
 
