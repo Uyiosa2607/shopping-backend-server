@@ -20,4 +20,4 @@ productRouter.patch("/:id", verifyAuthentication, updateProduct);
 
 productRouter.delete("/remove", verifyAuthentication, removeProduct);
 
-export { productRouter };
+export default productRouter;

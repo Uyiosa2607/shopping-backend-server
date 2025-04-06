@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
-import { Prisma } from "./prisma";
+import { Prisma } from "../utils/prisma";
 
 passport.use(
   new LocalStrategy(

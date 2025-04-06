@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import crypto from "crypto";
 import axios from "axios";
-import { Prisma } from "../libs/prisma";
+import { Prisma } from "../utils/prisma";
 
 async function initPayment(req: Request, res: Response): Promise<any> {
   let { email, amount } = req.body;

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Prisma } from "../libs/prisma";
+import { Prisma } from "../utils/prisma";
 
 //fetch all availble items from the database
 async function getAllProducts(req: Request, res: Response): Promise<any> {

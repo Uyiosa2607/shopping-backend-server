@@ -4,6 +4,9 @@ import {
   handleLogout,
   handleRegistration,
   checkAuthStatus,
+  verifyAccount,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/authControllers";
 import passport from "../libs/passport";
 
@@ -13,5 +16,8 @@ authRouter.post("/login", passport.authenticate("local"), handleLogin);
 authRouter.post("/register", handleRegistration);
 authRouter.get("/auth-status", checkAuthStatus);
 authRouter.post("/logout", handleLogout);
+authRouter.post("/forgot-password", forgotPassword);
+authRouter.get("/verify-email", verifyAccount);
+authRouter.post("/reset-password", resetPassword);
 
 export default authRouter;
