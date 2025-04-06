@@ -57,27 +57,6 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/api/v1/test-mail", async function (req: Request, res: Response) {
-  // const resetLink = `http://yourdomain.com/reset-password?token=abc123`;
-  try {
-    const email = "aghahowauyiosa58@gmail.com";
-
-    await sendEmail(
-      email,
-      "TEST EMAIL CONFIG",
-      `
-    <p>This is a test mail service</p>
-   
-  `
-    );
-
-    res.send("test mail has been sent");
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error.message);
-  }
-});
-
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/pay", paymentRouter);
