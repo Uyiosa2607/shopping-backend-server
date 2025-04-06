@@ -12,6 +12,12 @@ passport.use(
         if (!user)
           return done(null, false, { message: "Account does not exist" });
 
+        if (user.isVerified === false)
+          return done(
+            new Error("please check your inbox for email verification"),
+            false
+          );
+
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch)
           return done(null, false, { message: "Invalid credentials" });
