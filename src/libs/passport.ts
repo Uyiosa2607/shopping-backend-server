@@ -9,14 +9,12 @@ passport.use(
     async (email, password, done) => {
       try {
         const user = await Prisma.users.findUnique({ where: { email } });
-        if (!user)
-          return done(null, false, { message: "Account does not exist" });
+        if (!user) return done(null, false);
 
         if (user.isVerified === false)
-          return done(
-            new Error("please check your inbox for email verification"),
-            false
-          );
+          return done(null, false, {
+            message: "Please verify your email before logging in",
+          });
 
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch)

@@ -14,6 +14,7 @@ declare global {
   }
 }
 
+//handles creation of new user
 async function handleRegistration(req: Request, res: Response) {
   const { email, password, name } = req.body;
 
@@ -76,7 +77,6 @@ function handleLogin(req: Request, res: Response): any {
 }
 
 //endpoint to handleForgot password
-
 async function forgotPassword(req: Request, res: Response): Promise<any> {
   const { email } = req.body;
   try {
