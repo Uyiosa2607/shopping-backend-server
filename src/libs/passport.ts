@@ -18,25 +18,13 @@ passport.use(
       const user = await Prisma.users.findUnique({
         where: { email: payload.email },
       });
-      if (user) return done(null, user);
-      return done(null, false);
+      if (!user) return done(null, false);
+      if (user?.isVerified !== true) return done(null, false);
+      return done(null, user);
     } catch (err) {
       return done(err, false);
     }
   })
 );
-
-// passport.serializeUser((user: any, done) => {
-//   done(null, user.email);
-// });
-
-// passport.deserializeUser(async (email: string, done) => {
-//   try {
-//     const user = await Prisma.users.findUnique({ where: { email } });
-//     done(null, user);
-//   } catch (error) {
-//     done(error, false);
-//   }
-// });
 
 export default passport;

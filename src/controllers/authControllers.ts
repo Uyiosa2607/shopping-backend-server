@@ -97,6 +97,11 @@ async function handleLogin(req: Request, res: Response): Promise<any> {
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return res.status(400).json({ error: "Invalid credentials" });
 
+    if (user?.isVerified !== true)
+      return res
+        .status(401)
+        .json("please check your inbox to verify your email");
+
     const token = jwt.sign(
       { email: user.email, id: user.id, isAdmin: user.isAdmin },
       process.env.JWT_SECRET as string,
@@ -167,12 +172,12 @@ async function generateAcessToken(
       httpOnly: true,
     });
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: process.env.NODE_ENV === "production",
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+    // res.cookie("refreshToken", refreshToken, {
+    //   httpOnly: process.env.NODE_ENV === "production",
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "none",
+    //   maxAge: 24 * 60 * 60 * 1000,
+    // });
 
     return res.status(200).json({ message: "access token refreshed" });
   } catch (error) {
