@@ -1,32 +1,28 @@
-import { Response, Request, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-function verifyAuthentication(req: Request, res: Response, next: NextFunction) {
-  if (req.isAuthenticated()) {
-    return next();
+async function verifyRefreshToken(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> {
+  const refreshToken = req.cookies["refreshToken"];
+
+  if (!refreshToken) {
+    return res.status(403).json("not authorized");
   }
-  res.status(403).json("unathorized");
+
+  try {
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_KEY!
+    ) as Express.User;
+
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(403).json({ error: "Invalid or expired refresh token" });
+  }
 }
 
-// async function checkAdminAccess(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ): Promise<any> {
-//   if (!req.isAuthenticated()) return res.status(401).json("not authorized");
-//   try {
-//     const user = await Prisma.users.findUnique({
-//       where: { email: req.user?.email },
-//     });
-//     if (user?.isAdmin !== true) {
-//       return res
-//         .status(403)
-//         .json("access denied, only admins can access function");
-//     }
-//     next();
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json("something went wrong, internal server error!");
-//   }
-// }
-
-export { verifyAuthentication };
+export { verifyRefreshToken };

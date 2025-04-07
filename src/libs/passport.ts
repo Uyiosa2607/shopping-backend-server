@@ -4,7 +4,7 @@ import { Strategy } from "passport-jwt";
 import { Prisma } from "../utils/prisma";
 
 const cookieExtractor = function (req: Request) {
-  return req.cookies?.token || null;
+  return req.cookies?.accessToken || null;
 };
 
 const opts = {

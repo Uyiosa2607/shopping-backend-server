@@ -15,6 +15,25 @@ declare global {
   }
 }
 
+interface Account {
+  email: string;
+  id: string;
+  isAdmin: boolean;
+}
+
+//function to generate refresh token without expiry date
+function generateRefreshToken(user: Account): string {
+  const options = {
+    expiresIn: "1d",
+  };
+  const refreshToken = jwt.sign(
+    { email: user?.email, uid: user?.id, isAdmin: user?.isAdmin },
+    process.env.JWT_REFRESH_KEY!,
+    options
+  );
+  return refreshToken;
+}
+
 //handles creation of new user
 async function handleRegistration(req: Request, res: Response) {
   const { email, password, name } = req.body;
@@ -80,14 +99,23 @@ async function handleLogin(req: Request, res: Response): Promise<any> {
     if (!isValid) return res.status(400).json({ error: "Invalid credentials" });
 
     const token = jwt.sign(
-      { email: user.email },
+      { email: user.email, id: user.id, isAdmin: user.isAdmin },
       process.env.JWT_SECRET as string,
       {
-        expiresIn: "1d",
+        expiresIn: "6h",
       }
     );
 
-    res.cookie("token", token, {
+    res.cookie("accessToken", token, {
+      httpOnly: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      maxAge: 5 * 60 * 60 * 1000,
+    });
+
+    const refreshToken = generateRefreshToken(user);
+
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: process.env.NODE_ENV === "production",
       secure: process.env.NODE_ENV === "production",
       sameSite: "none",
@@ -98,6 +126,59 @@ async function handleLogin(req: Request, res: Response): Promise<any> {
   } catch (error) {
     console.log(error);
     return res.status(500).json("internal server error!,something went wrong");
+  }
+}
+
+async function generateAcessToken(
+  req: Request,
+  res: Response
+): Promise<any | string[]> {
+  const options = {
+    expiresIn: "6h",
+  };
+
+  //signs the jwt token with the user id, email and role
+  try {
+    const accessToken = jwt.sign(
+      {
+        email: req.user?.email,
+        id: req.user?.id,
+        isAdmin: req.user?.isAdmin,
+      },
+      process.env.JWT_SECRET!,
+      options
+    );
+
+    const refreshToken = jwt.sign(
+      {
+        email: req.user?.email,
+        id: req.user?.id,
+        isAdmin: req.user?.isAdmin,
+      },
+      process.env.JWT_REFRESH_KEY!,
+      { expiresIn: "1d" }
+    );
+    //sends back new access token
+    console.log("token refresh response was received");
+
+    res.cookie("accessToken", accessToken, {
+      maxAge: 5 * 60 * 60 * 1000,
+      sameSite: "none",
+      secure: true,
+      httpOnly: true,
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({ message: "access token refreshed" });
+  } catch (error) {
+    console.log(error);
+    return res.status(501).json({ error: "internal server error" });
   }
 }
 
@@ -187,25 +268,25 @@ async function verifyAccount(req: Request, res: Response): Promise<any> {
 }
 
 //handles logout ...deletion of user session data
-function handleLogout(req: Request, res: Response): void {
-  req.logout((err) => {
-    if (err) {
-      console.error("Logout error:", err);
-      res.status(500).json({ message: "Error logging out" });
-      return;
-    }
-
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Session destroy error:", err);
-        res.status(500).json({ message: "Failed to destroy session" });
-        return;
-      }
-
-      res.clearCookie("connect.sid");
-      res.status(200).json({ message: "Logged out successfully" });
+async function handleLogout(req: Request, res: Response): Promise<any> {
+  try {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
     });
-  });
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ error: "internal server error, something went wrong" });
+  }
+  return res.status(200).json({ message: "logout successfull" });
 }
 
 export {
@@ -216,4 +297,5 @@ export {
   verifyAccount,
   forgotPassword,
   resetPassword,
+  generateAcessToken,
 };
