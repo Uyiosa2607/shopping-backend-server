@@ -56,7 +56,7 @@ async function handleRegistration(req: Request, res: Response) {
       },
     });
 
-    const verificationUrl = `http://localhost:4001/api/v1/auth/verify-email?token=${token}`;
+    const verificationUrl = `https://shopping-backend-server-1.onrender.com/api/v1/auth/verify-email?token=${token}`;
     const html = `<p>Welcome! Please confirm your email:</p>
                   <a href="${verificationUrl}">Verify Email</a>`;
 
@@ -204,7 +204,7 @@ async function forgotPassword(req: Request, res: Response): Promise<any> {
       data: { resetToken: token, resetExpires: expires },
     });
 
-    const resetUrl = `http://localhost:4001/api/v1/auth/reset-password?token=${token}`;
+    const resetUrl = `https://shopping-backend-server-1.onrender.com/api/v1/auth/reset-password?token=${token}`;
     const html = `<p>Click to reset your password: <a href="${resetUrl}">Reset Password</a></p>`;
 
     await sendEmail(email, "Password Reset Request", html);
