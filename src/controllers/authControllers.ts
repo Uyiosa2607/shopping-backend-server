@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { Prisma } from "../utils/prisma";
 import crypto from "crypto";
 import { sendEmail } from "../utils/mailer";
+import jwt from "jsonwebtoken";
 
 declare global {
   namespace Express {
@@ -62,18 +63,42 @@ async function handleRegistration(req: Request, res: Response) {
 }
 
 //End point function to get auth status / check auth status
-function checkAuthStatus(req: Request, res: Response): any {
+async function checkAuthStatus(req: Request, res: Response): Promise<any> {
   if (!req.isAuthenticated()) return res.status(403).json("not authorized");
   return res.sendStatus(200);
 }
 
 //function to handle login/ authentication
-function handleLogin(req: Request, res: Response): any {
-  res.status(200).json({
-    id: req.user?.id,
-    email: req.user?.email,
-    isAdmin: req.user?.isAdmin,
-  });
+async function handleLogin(req: Request, res: Response): Promise<any> {
+  const { email, password } = req.body;
+
+  try {
+    const user = await Prisma.users.findUnique({ where: { email } });
+    if (!user) return res.status(400).json({ error: "Account does not exist" });
+
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) return res.status(400).json({ error: "Invalid credentials" });
+
+    const token = jwt.sign(
+      { email: user.email },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: "1d",
+      }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({ message: "Login successful", token });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json("internal server error!,something went wrong");
+  }
 }
 
 //endpoint to handleForgot password

@@ -1,44 +1,42 @@
 import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-import bcrypt from "bcrypt";
+import { Request } from "express";
+import { Strategy } from "passport-jwt";
 import { Prisma } from "../utils/prisma";
 
+const cookieExtractor = function (req: Request) {
+  return req.cookies?.token || null;
+};
+
+const opts = {
+  jwtFromRequest: cookieExtractor,
+  secretOrKey: process.env.JWT_SECRET as string,
+};
+
 passport.use(
-  new LocalStrategy(
-    { usernameField: "email" },
-    async (email, password, done) => {
-      try {
-        const user = await Prisma.users.findUnique({ where: { email } });
-        if (!user) return done(null, false);
-
-        if (user.isVerified === false)
-          return done(null, false, {
-            message: "Please verify your email before logging in",
-          });
-
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch)
-          return done(null, false, { message: "Invalid credentials" });
-        return done(null, user);
-      } catch (error) {
-        console.error("Login error:", error);
-        return done(error, false);
-      }
+  new Strategy(opts, async (payload, done) => {
+    try {
+      const user = await Prisma.users.findUnique({
+        where: { email: payload.email },
+      });
+      if (user) return done(null, user);
+      return done(null, false);
+    } catch (err) {
+      return done(err, false);
     }
-  )
+  })
 );
 
-passport.serializeUser((user: any, done) => {
-  done(null, user.email);
-});
+// passport.serializeUser((user: any, done) => {
+//   done(null, user.email);
+// });
 
-passport.deserializeUser(async (email: string, done) => {
-  try {
-    const user = await Prisma.users.findUnique({ where: { email } });
-    done(null, user);
-  } catch (error) {
-    done(error, false);
-  }
-});
+// passport.deserializeUser(async (email: string, done) => {
+//   try {
+//     const user = await Prisma.users.findUnique({ where: { email } });
+//     done(null, user);
+//   } catch (error) {
+//     done(error, false);
+//   }
+// });
 
 export default passport;

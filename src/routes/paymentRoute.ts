@@ -1,17 +1,21 @@
 import express from "express";
-import { verifyAuthentication } from "../middleware/middlewares";
 import {
   initPayment,
   verifyPayment,
   createOrderRecord,
 } from "../controllers/paymentController";
+import passport from "../libs/passport";
 
 const paymentRouter = express.Router();
 
-paymentRouter.post("/initialize-payment", verifyAuthentication, initPayment);
+paymentRouter.post(
+  "/initialize-payment",
+  passport.authenticate("jwt", { session: false }),
+  initPayment
+);
 paymentRouter.get(
   "/verify-payment/:reference",
-  verifyAuthentication,
+  passport.authenticate("jwt", { session: false }),
   verifyPayment
 );
 paymentRouter.post("/payment-webhook", createOrderRecord);

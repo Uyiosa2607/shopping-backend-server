@@ -6,18 +6,34 @@ import {
   updateProduct,
   removeProduct,
 } from "../controllers/productControllers";
-import { verifyAuthentication } from "../middleware/middlewares";
+import passport from "../libs/passport";
 
 const productRouter = express.Router();
 
 productRouter.get("/", getAllProducts);
 
-productRouter.get("/items", verifyAuthentication, findProduct);
+productRouter.get(
+  "/items",
+  passport.authenticate("jwt", { session: false }),
+  findProduct
+);
 
-productRouter.post("/add-product", verifyAuthentication, addProduct);
+productRouter.post(
+  "/add-product",
+  passport.authenticate("jwt", { session: false }),
+  addProduct
+);
 
-productRouter.patch("/:id", verifyAuthentication, updateProduct);
+productRouter.patch(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  updateProduct
+);
 
-productRouter.delete("/remove", verifyAuthentication, removeProduct);
+productRouter.delete(
+  "/remove",
+  passport.authenticate("jwt", { session: false }),
+  removeProduct
+);
 
 export default productRouter;
