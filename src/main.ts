@@ -48,8 +48,8 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24,
       path: "/",
       secure: true,
-      sameSite: "lax",
-      httpOnly: process.env.NODE_ENV === "production" ? false : true,
+      sameSite: "none",
+      httpOnly: process.env.NODE_ENV === "production" ? true : false,
     },
   })
 );
