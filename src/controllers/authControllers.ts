@@ -90,7 +90,7 @@ async function handleLogin(req: Request, res: Response): Promise<any> {
     res.cookie("token", token, {
       httpOnly: process.env.NODE_ENV === "production",
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
