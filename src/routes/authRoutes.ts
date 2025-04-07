@@ -10,12 +10,17 @@ import {
   generateAcessToken,
 } from "../controllers/authControllers";
 import { verifyRefreshToken } from "../middleware/middlewares";
+import passport from "../libs/passport";
 
 const authRouter = express.Router();
 
 authRouter.post("/login", handleLogin);
 authRouter.post("/register", handleRegistration);
-authRouter.get("/auth-status", checkAuthStatus);
+authRouter.get(
+  "/auth-status",
+  passport.authenticate("jwt", { session: false }),
+  checkAuthStatus
+);
 authRouter.post("/logout", handleLogout);
 authRouter.post("/forgot-password", forgotPassword);
 authRouter.get("/verify-email", verifyAccount);
